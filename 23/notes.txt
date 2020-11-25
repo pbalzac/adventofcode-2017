@@ -1,0 +1,90 @@
+* h only incremented when the two jnz before it passthrough, so f and g must be 0
+* c never changes
+* increments of 17
+106700
+123700
+
+# setup
+set b 67
+set c b
+jnz a 2
+jnz 1 5
+mul b 100
+sub b -100000
+set c b
+sub c -17000
+
+
+set f 1
+set d 2
+set e 2
+set g d
+mul g e
+sub g b
+jnz g 2
+set f 0
+sub e -1
+set g e
+sub g b
+jnz g -8
+sub d -1
+set g d
+sub g b
+jnz g -13
+jnz f 2
+# if f and g are 0, increment h - if g is 0 but f is not, don't increment h but will still check b vs. c and increment b
+sub h -1
+# check difference between b and c
+set g b
+sub g c
+# if still different b += 17 and jump to -23 otherwise success
+jnz g 2
+jnz 1 3
+sub b -17 # only place b is changed
+jnz 1 -23
+
+--------
+S: f = 1;
+d = 2;
+B: e = 2;
+A: g = d;
+g *= e;
+g -= b;
+if (g == 0)
+   { f = 0; }
+e += 1;
+g = e;
+g -= b;
+if (g != 0) GOTO A
+
+# this runs until e == b, e from 2..b
+# f set to 0 if (d * e ==) b
+
+d += 1
+g = d
+g -= b
+if (g != 0) GOTO B
+
+# this runs until d == b, incrementing d by 1, and rerunning loop w/ e starting at 2 again
+
+if (f == 0)
+   { h += 1; }
+if (b != c)
+   { b += 17; GOTO S
+------   
+
+
+S: f = 1;
+d = 2;
+B: e = 2;
+A: if ((d * e) == b) f = 0;
+e += 1;
+if (e != b) GOTO A;
+d += 1;
+if (d != b) GOTO B;
+if (f == 0) h += 1;
+if (b != c)
+   b += 17;
+   GOTO S;
+
+AHA finding non-prime numbers from b..c incrementing by steps of 17
